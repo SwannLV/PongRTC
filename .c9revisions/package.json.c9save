@@ -1,0 +1,8 @@
+{"ts":1354073659857,"silentsave":true,"restoring":false,"patch":[[]],"length":0}
+{"contributors":[],"silentsave":true,"ts":1354073660945,"patch":[[{"diffs":[[1,"package.json"]],"start1":0,"start2":0,"length1":0,"length2":12}]],"length":12,"saved":false}
+{"ts":1354073664991,"patch":[[{"diffs":[[-1,"package.json"]],"start1":0,"start2":0,"length1":12,"length2":0}]],"length":0,"saved":false}
+{"ts":1354073672232,"patch":[[{"diffs":[[1,"{\r\n  \"name\": \"DemoSLV\",\r\n  \"version\": \"0.0.2\",\r\n  \"dependencies\": {\r\n    \"express\": \"2.5.x\"\r\n  },\r\n  \"engines\": {\r\n    \"node\": \"0.8.x\",\r\n    \"npm\": \"1.1.x\"\r\n  }\r\n}\r\n"]],"start1":0,"start2":0,"length1":0,"length2":165}]],"length":165,"saved":false}
+{"ts":1354073675004,"patch":[[{"diffs":[[0,"\": \""],[-1,"DemoSLV"],[1,"PongR"],[0,"\",\r\n"]],"start1":10,"start2":10,"length1":15,"length2":13}]],"length":163,"saved":false}
+{"ts":1354073675982,"patch":[[{"diffs":[[0,": \"PongR"],[1,"TC"],[0,"\",\r\n  \"v"]],"start1":11,"start2":11,"length1":16,"length2":18}]],"length":165,"saved":false}
+{"ts":1354073681223,"patch":[[{"diffs":[[0,"\": \"0.0."],[-1,"2"],[0,"\",\r\n  \"d"]],"start1":35,"start2":35,"length1":17,"length2":16}]],"length":164,"saved":false}
+{"ts":1354073682370,"patch":[[{"diffs":[[0,"\": \"0.0."],[1,"1"],[0,"\",\r\n  \"d"]],"start1":35,"start2":35,"length1":16,"length2":17}]],"length":165,"saved":false}

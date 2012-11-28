@@ -159,14 +159,14 @@ function update()
     var deltaMove = deltaClock * 500;
     
     if(keyboard.pressed("c")) headXoffset = headX;
-	/*if ( keyboard.pressed("left") ) 
+	if ( keyboard.pressed("left") ) 
 	{ 
 		localRacket.position.x += deltaMove;
 	}
     if ( keyboard.pressed("right") ) 
     { 
 		localRacket.position.x -= deltaMove;
-	}*/
+	}
     localRacket.position.x = headX - headXoffset;
 
     // IF NO PEER CONNECTION:
@@ -183,7 +183,7 @@ document.addEventListener("facetrackingEvent", function(e) {
 }, false);
 
 document.addEventListener("headtrackingEvent", function(e) {
-    headX = - e.x * fieldW/8.0;
+    headX = - e.x * fieldW/16.0;
 }, false);
 
 function render() 
