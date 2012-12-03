@@ -6,8 +6,8 @@ var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
 
 // Communication manager server
-//var serverUrl = 'ws://swannlv.1.jit.su/';
-var serverUrl = 'ws://localhost:3000/';
+var serverUrl = 'ws://swannlv.1.jit.su/';
+//var serverUrl = 'ws://localhost:3000/';
 var room = 'superRoom';
 // video Elements
 var localVideo, remoteVideo;
@@ -166,17 +166,22 @@ function init()
 function animate() 
 {
     requestAnimationFrame( animate );
+    localRacket.position.x = headX - headXoffset;
     if( localVideo && localVideo.readyState === localVideo.HAVE_ENOUGH_DATA ){
         localVideoTexture.needsUpdate = true;
         
         rtc._socket.send(JSON.stringify({
               "eventName": "msg",
               "data": {
-              "time": new Date(),
               "room": room,
-              "color": 'fff'
+              "headX": headX - headXoffset
               }
         }));
+    }
+    else {
+        // IF NO PEER CONNECTION:
+        //localRacket.position.x = headX - headXoffset;
+        remoteRacket.position.x = localRacket.position.x;
     }
     if( remoteVideo && remoteVideo.readyState === remoteVideo.HAVE_ENOUGH_DATA ){
         remoteVideoTexture.needsUpdate = true;
@@ -199,10 +204,9 @@ function update()
     { 
 		localRacket.position.x -= deltaMove;
 	}
-    localRacket.position.x = headX - headXoffset;
-
-    // IF NO PEER CONNECTION:
-    remoteRacket.position.x = localRacket.position.x;
+   // 
+   
+    //localRacket.position.x = headX - headXoffset;
 
     updateBallPosition(deltaClock);
     
@@ -295,7 +299,9 @@ function connectRTC () {
     });
     
     rtc.on('receive_msg', function(data, socket){
-        console.log(data.timeIn + ' // ' + data.timeOut);
+         //localRacket.position.x = data.lcRtX;
+         remoteRacket.position.x = data.rmRtX;
+         console.log(data.rmRtX);
     });
 
 }
