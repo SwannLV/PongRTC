@@ -5,9 +5,12 @@ var container, scene, camera, renderer, controls, stats;
 var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
 
-var localVideo;
-var localStream;
-var localVideoTexture;
+// Communication manager server
+var serverUrl = 'ws://swannlv.1.jit.su/';
+// video Elements
+var localVideo, remoteVideo;
+var localVideoTexture, remoteVideoTexture;
+// Meshes
 var localRacket, remoteRacket, ball;
 // constant for the field
 var fieldW   = 859;
@@ -83,10 +86,24 @@ function init()
     canvasInput.setAttribute('height','240');
     
     localVideo = document.createElement('video');
+    localVideo.id = 'video';
     localVideo.width     = 320;
     localVideo.height    = 240;
     localVideo.autoplay  = true;
     document.body.appendChild(localVideo);
+    remoteVideo = document.createElement('video');
+    remoteVideo.id = 'remoteVideo';
+    remoteVideo.width     = 320;
+    remoteVideo.height    = 240;
+    remoteVideo.autoplay  = true;
+    document.body.appendChild(remoteVideo);
+    
+    // start
+	rtc.createStream({"video": true, "audio": true}, function(stream){
+		localVideo.src	= URL.createObjectURL(stream);
+	}, function(){
+		console.log('createStream failed', arguments);
+	});
     
     var htracker = new headtrackr.Tracker({smoothing : true, fadeVideo : true, ui : false});
     htracker.init(localVideo, canvasInput);
@@ -96,6 +113,11 @@ function init()
 	// do a flipX in the video1Texture
 	localVideoTexture.repeat.set(-1, 1);
 	localVideoTexture.offset.set( 1, 0);
+    
+    remoteVideoTexture	= new THREE.Texture(remoteVideo);
+	// do a flipX in the video1Texture
+	remoteVideoTexture.repeat.set(-1, 1);
+	remoteVideoTexture.offset.set( 1, 0);
         
 	var racketGeometry = new THREE.CubeGeometry( 160, 120, 0 );
 	var localCubeMaterial = new THREE.MeshBasicMaterial( { map: localVideoTexture, transparent: true, opacity: 0.5} );
@@ -103,7 +125,7 @@ function init()
 	localRacket.position.set(0,60,-450);
 	scene.add(localRacket);
     
-    var remoteCubeMaterial = new THREE.MeshBasicMaterial( { color: 0xFF4444, map: localVideoTexture } );
+    var remoteCubeMaterial = new THREE.MeshBasicMaterial( { color: 0xFF4444, map: remoteVideoTexture } );
     remoteRacket = new THREE.Mesh( racketGeometry, remoteCubeMaterial );
 	remoteRacket.position.set(0,60,450);
 	scene.add(remoteRacket);
@@ -113,41 +135,18 @@ function init()
 	ball = new THREE.Mesh( ballGeometry, ballMaterial );
     ball.position.set (0,20,0);
 	scene.add(ball);
-}
-/*
-function doGetUserMedia() {
-    // Call into getUserMedia via the polyfill (adapter.js).
-    try {
-      getUserMedia({'audio':true, 'video':true}, onUserMediaSuccess,
-                   onUserMediaError);
-      console.log("Requested access to local media with new syntax.");
-    } catch (e) {
-      alert("getUserMedia() failed. Is this a WebRTC capable browser?");
-      console.log("getUserMedia failed with exception: " + e.message);
-    }
-
-}
-
-
-function onUserMediaSuccess(stream) {
-    console.log("User has granted access to local media.");
-    // Call the polyfill wrapper to attach the media stream to this element.
-    attachMediaStream(localVideo, stream);
-    localVideo.style.opacity = 1;
-    localStream = stream;
-}
     
-function onUserMediaError(error) {
-    console.log("Failed to get access to local media. Error code was " + error.code);
-    alert("Failed to get access to local media. Error code was " + error.code + ".");
+    connectRTC();
 }
-*/
   
 function animate() 
 {
     requestAnimationFrame( animate );
-    if( localVideo.readyState === localVideo.HAVE_ENOUGH_DATA ){
+    if( localVideo && localVideo.readyState === localVideo.HAVE_ENOUGH_DATA ){
         localVideoTexture.needsUpdate = true;
+    }
+    if( remoteVideo && remoteVideo.readyState === remoteVideo.HAVE_ENOUGH_DATA ){
+        remoteVideoTexture.needsUpdate = true;
     }
 	render();		
 	update();
@@ -177,6 +176,14 @@ function update()
 	//controls.update();
 	stats.update();
 }
+
+document.addEventListener("headtrackrStatus", function(e) {
+    setTrackerStatus(e.status);
+});
+
+document.addEventListener("videoPlaying", function(e) {
+    console.log('videolaying');
+});
 
 document.addEventListener("facetrackingEvent", function(e) {
     //drawIdent(canvasCtx, e.x, e.y);
@@ -223,4 +230,30 @@ function updateBallPosition(deltaClock)
     	pos.z	= Math.max(pos.z, -fieldL/2);
     	pos.z	= Math.min(pos.z, +fieldL/2);
     }
+}
+
+function setTrackerStatus(state) {
+    console.log(state);
+    $('#message').html(state);
+  }
+  
+function connectRTC () {
+
+    console.log('connectRTC');
+    
+    rtc.connect(serverUrl, "superRoom");
+    
+    rtc.on('add remote stream', function(stream, socketId) {
+        console.log("Adding remote stream...", socketId);
+        //var rmVideo = $('#remoteVideo');
+        remoteVideo.src = URL.createObjectURL(stream);
+    	rtc.attachStream(stream, "remoteVideo");
+    });
+    
+    rtc.on('disconnect stream', function(socketId) {
+    	console.log("Remove remote stream...", socketId);
+    	var video	= document.getElementById('remoteVideo');
+    	if( video )	video.parentNode.removeChild(video);
+    });
+
 }

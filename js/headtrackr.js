@@ -65,9 +65,12 @@ headtrackr.Tracker = function(params) {
 	
 	this.status = "";
 	
-  var statusEvent = document.createEvent("Event");
-  statusEvent.initEvent("headtrackrStatus", true, true);
-	
+    var videoStatusEvent = document.createEvent("Event");
+    videoStatusEvent.initEvent("videoPlaying", true, true);
+
+    var statusEvent = document.createEvent("Event");
+    statusEvent.initEvent("headtrackrStatus", true, true);
+
 	var headtrackerStatus = function(message) {
 	  statusEvent.status = message;
 		document.dispatchEvent(statusEvent);
@@ -110,14 +113,20 @@ headtrackr.Tracker = function(params) {
 		  };
 		  
 			// set up stream
-			navigator.getUserMedia(videoSelector, function( stream ) {
-				headtrackerStatus("camera found");
-				video.src = window.URL.createObjectURL(stream);
-				video.play();
-			}, function() {
-				headtrackerStatus("no camera");
-				insertAltVideo(video);
-			});
+            if (video) {
+             // TO DO   
+            }
+            else {
+    			navigator.getUserMedia(videoSelector, function( stream ) {
+    				headtrackerStatus("camera found");
+    				video.src = window.URL.createObjectURL(stream);
+                    localStream = stream;
+    				video.play();
+    			}, function() {
+    				headtrackerStatus("no camera");
+    				insertAltVideo(video);
+    			});
+            }
 		} else {
 			headtrackerStatus("no getUserMedia");
 			if (!insertAltVideo(video)) {
@@ -304,6 +313,9 @@ headtrackr.Tracker = function(params) {
 		} else {
       window.setTimeout(starter, 100);
 		}
+
+	    videoStatusEvent.status = "videoPlaying";
+	    document.dispatchEvent(videoStatusEvent);
 	}
 	
 	this.start = function() {

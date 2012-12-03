@@ -25,6 +25,7 @@ var server = createServer(function(req, res) {
     if (req.method === "GET" || req.method === "HEAD") {
         var handler = getMap[url.parse(req.url).pathname] || notFound;
 
+        //console.log("         req.url: " + req.url);
         res.simpleText = function(code, body) {
             res.writeHead(code, {
                 "Content-Type": "text/plain",
@@ -48,7 +49,17 @@ var server = createServer(function(req, res) {
 
         handler(req, res);
     }
+    else if (req.method === "POST") {
+        console.log(req.url);//onPostReceived(req, res);
+    }
 });
+
+function onPostReceived(req, res){
+    console.log("         req.url: " + req.url);
+    //req.write('aaaaaaaaaa');
+    
+    handler(req, res);
+}
 
 fu.listen = function(port, host) {
     server.listen(port, host);
