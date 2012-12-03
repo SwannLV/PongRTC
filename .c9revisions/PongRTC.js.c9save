@@ -1560,3 +1560,4 @@
 {"ts":1354578289063,"patch":[[{"diffs":[[0,"og(data."],[-1,"socket"],[1,"rmRtX"],[0,");\r\n    "]],"start1":10254,"start2":10254,"length1":22,"length2":21}]],"length":10285,"saved":false}
 {"ts":1354578693541,"patch":[[{"diffs":[[0,"server\r\n"],[-1,"//"],[0,"var serv"]],"start1":256,"start2":256,"length1":18,"length2":16}]],"length":10283,"saved":false}
 {"ts":1354578694706,"patch":[[{"diffs":[[0,".jit.su/';\r\n"],[1,"//"],[0,"var serverUr"]],"start1":295,"start2":295,"length1":24,"length2":26}]],"length":10285,"saved":false}
+{"ts":1354578872580,"patch":[[{"diffs":[[0,"X;\r\n"],[-1,"         console.log(data.rmRtX);\r\n"],[0,"    "]],"start1":10232,"start2":10232,"length1":43,"length2":8}]],"length":10250,"saved":false}

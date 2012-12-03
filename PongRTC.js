@@ -301,7 +301,6 @@ function connectRTC () {
     rtc.on('receive_msg', function(data, socket){
          //localRacket.position.x = data.lcRtX;
          remoteRacket.position.x = data.rmRtX;
-         console.log(data.rmRtX);
     });
 
 }
