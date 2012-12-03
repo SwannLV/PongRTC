@@ -22,6 +22,14 @@ fu.get("/js/smoother.js", fu.staticHandler("js/smoother.js"));
 fu.get("/js/camshift.js", fu.staticHandler("js/camshift.js"));
 fu.get("/js/facetrackr.js", fu.staticHandler("js/facetrackr.js"));
 fu.get("/js/headposition.js", fu.staticHandler("js/headposition.js"));
-fu.get("/js/webrtc.io.js", fu.staticHandler("js/webrtc.io.js"));
+fu.get("/js/webrtc.io.js", fu.staticHandler(__dirname + '/node_modules/webrtc.io/node_modules/webrtc.io-client/lib/webrtc.io.js'));
 fu.get("/Streams.js", fu.staticHandler("Streams.js"));
 fu.get("/PongRTC.js", fu.staticHandler("PongRTC.js"));
+
+// SKY DOME
+fu.get("/images/sky/posz.jpg", fu.staticHandler("images/sky/posz.jpg"));
+fu.get("/images/sky/negz.jpg", fu.staticHandler("images/sky/negz.jpg"));
+fu.get("/images/sky/posy.jpg", fu.staticHandler("images/sky/posy.jpg"));
+fu.get("/images/sky/negy.jpg", fu.staticHandler("images/sky/negy.jpg"));
+fu.get("/images/sky/posx.jpg", fu.staticHandler("images/sky/posx.jpg"));
+fu.get("/images/sky/negx.jpg", fu.staticHandler("images/sky/negx.jpg"));

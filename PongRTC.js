@@ -6,12 +6,14 @@ var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
 
 // Communication manager server
-var serverUrl = 'ws://swannlv.1.jit.su/';
+//var serverUrl = 'ws://swannlv.1.jit.su/';
+var serverUrl = 'ws://localhost:3000/';
+var room = 'superRoom';
 // video Elements
 var localVideo, remoteVideo;
 var localVideoTexture, remoteVideoTexture;
 // Meshes
-var localRacket, remoteRacket, ball;
+var localRacket, remoteRacket, ball, dome;
 // constant for the field
 var fieldW   = 859;
 var fieldL   = 1059;
@@ -62,20 +64,43 @@ function init()
     var light2 = new THREE.PointLight(0xffffff);
     light2.position.set(-500,250,-500);
 	scene.add(light2);
+    // DOME
+    var urls = [];
+    var skyTextures = [];
+    var names = ["posz","negz","posy","negy","posx","negx"];
+
+    var i;
+	for (i = 0; i < 6; i++) {
+		urls[i] = "images/sky/" + names[i] + ".jpg";
+		skyTextures[i] = THREE.ImageUtils.loadTexture(urls[i]);
+	}
+	var skyMaterials = [];
+	skyMaterials.push(new THREE.MeshBasicMaterial({ map: skyTextures[0] }));
+	skyMaterials.push(new THREE.MeshBasicMaterial({ map: skyTextures[1] }));
+	skyMaterials.push(new THREE.MeshBasicMaterial({ map: skyTextures[2] }));
+	skyMaterials.push(new THREE.MeshBasicMaterial({ map: skyTextures[3] }));
+	skyMaterials.push(new THREE.MeshBasicMaterial({ map: skyTextures[4] }));
+	skyMaterials.push(new THREE.MeshBasicMaterial({ map: skyTextures[5] }));
+    var larDome = 5000;
+    dome = new THREE.Mesh( new THREE.CubeGeometry( larDome, larDome, larDome, 1, 1, 1, skyMaterials, true), new THREE.MeshFaceMaterial() );
+    dome.doubleSided = true;
+    dome.rotation.y = 0;
+    dome.position.y = -1200;
+    scene.add(dome);
 	// FLOOR
-	var floorMaterial = new THREE.MeshBasicMaterial( { color: 0x333333 } );
+	var floorMaterial = new THREE.MeshBasicMaterial( { color: 0x555555, transparent: true, opacity: 1.0} );
 	var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
 	var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 	floor.position.y = -0.5;
 	floor.doubleSided = true;
 	scene.add(floor);
 	// SKYBOX/FOG
-	var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
+	/*var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
 	var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff } );
 	var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
     skyBox.flipSided = true; // render faces from inside of the cube, instead of from outside (default).
-	// scene.add(skyBox);
-	scene.fog = new THREE.FogExp2( 0x9999ff, 0.00025 );
+	 scene.add(skyBox);*/
+	//scene.fog = new THREE.FogExp2( 0x9999ff, 0.00025 );
 	
 	/////////////
 	// Rackets //
@@ -98,29 +123,28 @@ function init()
     remoteVideo.autoplay  = true;
     document.body.appendChild(remoteVideo);
     
-    // start
+    // Start RTC
 	rtc.createStream({"video": true, "audio": true}, function(stream){
 		localVideo.src	= URL.createObjectURL(stream);
 	}, function(){
 		console.log('createStream failed', arguments);
 	});
     
+    // Start Head Tracker
     var htracker = new headtrackr.Tracker({smoothing : true, fadeVideo : true, ui : false});
     htracker.init(localVideo, canvasInput);
     htracker.start();
 
 	localVideoTexture	= new THREE.Texture(localVideo);
-	// do a flipX in the video1Texture
 	localVideoTexture.repeat.set(-1, 1);
 	localVideoTexture.offset.set( 1, 0);
     
     remoteVideoTexture	= new THREE.Texture(remoteVideo);
-	// do a flipX in the video1Texture
 	remoteVideoTexture.repeat.set(-1, 1);
 	remoteVideoTexture.offset.set( 1, 0);
         
 	var racketGeometry = new THREE.CubeGeometry( 160, 120, 0 );
-	var localCubeMaterial = new THREE.MeshBasicMaterial( { map: localVideoTexture, transparent: true, opacity: 0.5} );
+	var localCubeMaterial = new THREE.MeshBasicMaterial( { map: localVideoTexture, transparent: true, opacity: 0.7} );
 	localRacket = new THREE.Mesh( racketGeometry, localCubeMaterial );
 	localRacket.position.set(0,60,-450);
 	scene.add(localRacket);
@@ -144,6 +168,15 @@ function animate()
     requestAnimationFrame( animate );
     if( localVideo && localVideo.readyState === localVideo.HAVE_ENOUGH_DATA ){
         localVideoTexture.needsUpdate = true;
+        
+        rtc._socket.send(JSON.stringify({
+              "eventName": "msg",
+              "data": {
+              "time": new Date(),
+              "room": room,
+              "color": 'fff'
+              }
+        }));
     }
     if( remoteVideo && remoteVideo.readyState === remoteVideo.HAVE_ENOUGH_DATA ){
         remoteVideoTexture.needsUpdate = true;
@@ -172,6 +205,9 @@ function update()
     remoteRacket.position.x = localRacket.position.x;
 
     updateBallPosition(deltaClock);
+    
+    // Move the sky
+    dome.rotation.y = (dome.rotation.y + deltaClock/100) % (2*Math.PI);
     
 	//controls.update();
 	stats.update();
@@ -211,7 +247,9 @@ function updateBallPosition(deltaClock)
     var localDist = ball.position.distanceToSquared(localRacket.position)/1000;
     var remoteDist = ball.position.distanceToSquared(remoteRacket.position)/1000;
     if ((localDist < 10 && ballVelZ < 0) || (remoteDist < 10 && ballVelZ > 0)){
-		ballVelZ	*= -1;
+        //if ((ball.position.z > localRacket.position.z) || (ball.position.z < remoteRacket.position.z)){
+		    ballVelZ	*= -1;
+        //}
         // TO DO: adjust angle with the exact impact position
         /*angle       = Math.random()*Math.PI*2;
         ballVelX    = Math.cos(angle)*10;
@@ -241,19 +279,23 @@ function connectRTC () {
 
     console.log('connectRTC');
     
-    rtc.connect(serverUrl, "superRoom");
+    rtc.connect(serverUrl, room);
     
     rtc.on('add remote stream', function(stream, socketId) {
         console.log("Adding remote stream...", socketId);
-        //var rmVideo = $('#remoteVideo');
         remoteVideo.src = URL.createObjectURL(stream);
     	rtc.attachStream(stream, "remoteVideo");
+        //.style.webkitTransform = "rotateY(0deg)";
     });
     
     rtc.on('disconnect stream', function(socketId) {
     	console.log("Remove remote stream...", socketId);
     	var video	= document.getElementById('remoteVideo');
     	if( video )	video.parentNode.removeChild(video);
+    });
+    
+    rtc.on('receive_msg', function(data, socket){
+        console.log(data.timeIn + ' // ' + data.timeOut);
     });
 
 }
