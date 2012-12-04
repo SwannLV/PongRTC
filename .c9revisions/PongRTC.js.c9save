@@ -1747,3 +1747,5 @@
 {"ts":1354603266890,"patch":[[{"diffs":[[0,"  Callee"],[1,"\""],[0,");\n    }"]],"start1":11027,"start2":11027,"length1":16,"length2":17}]],"length":11049,"saved":false}
 {"ts":1354603540274,"patch":[[{"diffs":[[0,"   });\n    \n    "],[1,"/*"],[0,"rtc.on('send off"]],"start1":10923,"start2":10923,"length1":32,"length2":34}]],"length":11051,"saved":false}
 {"ts":1354603542227,"patch":[[{"diffs":[[0,"\n    });"],[1,"*/"],[0,"\n\n}"]],"start1":11040,"start2":11040,"length1":11,"length2":13}]],"length":11053,"saved":false}
+{"ts":1354603756948,"patch":[[{"diffs":[[0," server\n"],[-1,"//"],[0,"var serv"]],"start1":238,"start2":238,"length1":18,"length2":16}]],"length":11051,"saved":false}
+{"ts":1354603759192,"patch":[[{"diffs":[[0,"t.su/';\n"],[1,"//"],[0,"var serv"]],"start1":280,"start2":280,"length1":16,"length2":18}]],"length":11053,"saved":false}

@@ -6,8 +6,8 @@ var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
 
 // Communication-manager server
-//var serverUrl = 'ws://swannlv.1.jit.su/';
-var serverUrl = 'ws://192.168.0.13:3000/';//localhost
+var serverUrl = 'ws://swannlv.1.jit.su/';
+//var serverUrl = 'ws://192.168.0.13:3000/';//localhost
 var isCaller = true;
 var localVideo, remoteVideo;
 var localVideoTexture, remoteVideoTexture;
