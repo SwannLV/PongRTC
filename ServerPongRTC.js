@@ -76,7 +76,7 @@ webRTC.rtc.on('msg', function(data, socket){
 		  var soc = webRTC.rtc.getSocket(socketId);
 
 		  if (soc) {
-			socket.send(JSON.stringify({
+			soc.send(JSON.stringify({
 				"eventName": "receive_msg",
 				"data": {
 					//"lcRtX": racket1X,
