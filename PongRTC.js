@@ -340,7 +340,6 @@ function connectRTC () {
     rtc.on('receive_msg', function(data, socket){
          //localRacket.position.x = data.lcRtX;
          remoteRacket.position.x = data.rmRtX;
-         console.log(data.ballZ);
          if (isCaller === false){
              ball.position.x = data.ballX;
              ball.position.z = -data.ballZ;

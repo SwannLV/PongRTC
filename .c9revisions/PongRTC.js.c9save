@@ -2051,3 +2051,4 @@
 {"ts":1354658109238,"patch":[[{"diffs":[[0,"ility * "],[1,"("],[0,"headX - "]],"start1":6700,"start2":6700,"length1":16,"length2":17}]],"length":11381,"saved":false}
 {"ts":1354658112970,"patch":[[{"diffs":[[0," headXoffset"],[1,")"],[0,";\n    if( lo"]],"start1":6716,"start2":6716,"length1":24,"length2":25}]],"length":11382,"saved":false}
 {"ts":1354658147640,"patch":[[{"diffs":[[0,"tion.x ="],[-1," *"],[0," sensibi"]],"start1":6683,"start2":6683,"length1":18,"length2":16}]],"length":11380,"saved":false}
+{"ts":1354658897257,"patch":[[{"diffs":[[0,"tX;\n"],[-1,"         console.log(data.ballZ);\n"],[0,"    "]],"start1":11116,"start2":11116,"length1":42,"length2":8}]],"length":11346,"saved":false}
