@@ -2068,3 +2068,5 @@
 {"ts":1354659264376,"patch":[[{"diffs":[[0,"he calle"],[-1,"e"],[0," = lags "]],"start1":11369,"start2":11369,"length1":17,"length2":16}]],"length":11412,"saved":false}
 {"ts":1354659268905,"patch":[[{"diffs":[[0,"alle"],[-1," = lags for the moment"],[1,"r"],[0,"')\n "]],"start1":11373,"start2":11373,"length1":30,"length2":9}]],"length":11391,"saved":false}
 {"ts":1354659279804,"patch":[[{"diffs":[[0,"he calle"],[-1,"r"],[1,"e"],[0,"')\n    }"]],"start1":11369,"start2":11369,"length1":17,"length2":17}]],"length":11391,"saved":false}
+{"ts":1354659781170,"patch":[[{"diffs":[[0,";\n\t}\n}\n\n"],[1,"toggleInfo()\n"],[0,"init();\n"]],"start1":1873,"start2":1873,"length1":16,"length2":29}]],"length":11404,"saved":false}
+{"ts":1354659782032,"patch":[[{"diffs":[[0,"leInfo()"],[1,";"],[0,"\ninit();"]],"start1":1885,"start2":1885,"length1":16,"length2":17}]],"length":11405,"saved":false}

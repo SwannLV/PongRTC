@@ -54,6 +54,7 @@ function toggleInfo() {
 	}
 }
 
+toggleInfo();
 init();
 animate();
 
