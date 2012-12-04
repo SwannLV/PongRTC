@@ -348,6 +348,7 @@ function connectRTC () {
     
     rtc.on('receive offer', function(data) {
         isCaller = false;
+        console.log('> your are the callee')
     });
 
 }
