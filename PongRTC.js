@@ -7,7 +7,7 @@ var clock = new THREE.Clock();
 
 // Communication-manager server
 var serverUrl = 'ws://swannlv.1.jit.su/';
-//var serverUrl = 'ws://192.168.0.13:3000/';//localhost
+//var serverUrl = 'ws://192.168.0.13:3000/';
 var isCaller = true;
 var localVideo, remoteVideo;
 var localVideoTexture, remoteVideoTexture;
@@ -20,6 +20,7 @@ var fieldL   = 1059;
 var angle    = 10;//Math.random()*Math.PI*2; // TO DO
 var ballVelX = Math.cos(angle)*10;
 var ballVelZ = Math.sin(angle)*10;
+var sensibility = 1.0;
 // constant for the head
 var headX = 0;
 var headXoffset = 0;
@@ -90,7 +91,7 @@ function init()
     var light2 = new THREE.PointLight(0xffffff);
     light2.position.set(-500,250,-500);
 	scene.add(light2);
-    // DOME
+    // SKY DOME
     var urls = [];
     var skyTextures = [];
     var names = ["posz","negz","posy","negy","posx","negx"];
@@ -120,13 +121,6 @@ function init()
 	floor.position.y = -0.5;
 	floor.doubleSided = true;
 	scene.add(floor);
-	// SKYBOX/FOG
-	/*var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
-	var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff } );
-	var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
-    skyBox.flipSided = true; // render faces from inside of the cube, instead of from outside (default).
-	 scene.add(skyBox);*/
-	//scene.fog = new THREE.FogExp2( 0x9999ff, 0.00025 );
 	
 	/////////////
 	// Rackets //
@@ -192,17 +186,30 @@ function init()
 function animate() 
 {
     requestAnimationFrame( animate );
-    localRacket.position.x = headX - headXoffset;
+    localRacket.position.x = sensibility * (headX - headXoffset);
     if( localVideo && localVideo.readyState === localVideo.HAVE_ENOUGH_DATA ){
         localVideoTexture.needsUpdate = true;
         
-        rtc._socket.send(JSON.stringify({
-              "eventName": "msg",
-              "data": {
-              "room": room,
-              "headX": headX - headXoffset
-              }
-        }));
+        if(isCaller){
+             rtc._socket.send(JSON.stringify({
+                  "eventName": "msg",
+                  "data": {
+                  "room": room,
+                  "ballX" : ball.position.x,
+                  "ballZ" : ball.position.z,
+                  "headX": headX - headXoffset
+                  }
+            }));
+        }
+        else {
+            rtc._socket.send(JSON.stringify({
+                  "eventName": "msg",
+                  "data": {
+                  "room": room,
+                  "headX": headX - headXoffset
+                  }
+            }));
+        }
     }
     else {
         // IF NO PEER CONNECTION:
@@ -230,8 +237,18 @@ function update()
     { 
 		localRacket.position.x -= deltaMove;
 	}
+    if ( keyboard.pressed("up") ) 
+    { 
+    	sensibility = 1.05 * sensibility;
+	}
+    if ( keyboard.pressed("down") && sensibility > 0.2) 
+    { 
+        sensibility = sensibility / 1.05;
+	}
 
-    updateBallPosition(deltaClock);
+    if (isCaller) {
+        updateBallPosition(deltaClock);
+    }
     
     // Move the sky
     dome.rotation.y = (dome.rotation.y + deltaClock/100) % (2*Math.PI);
@@ -322,13 +339,16 @@ function connectRTC () {
     
     rtc.on('receive_msg', function(data, socket){
          //localRacket.position.x = data.lcRtX;
-         //console.log('receive_msg / '+ data.rmRtX);
          remoteRacket.position.x = data.rmRtX;
+         console.log(data.ballZ);
+         if (isCaller === false){
+             ball.position.x = data.ballX;
+             ball.position.z = -data.ballZ;
+         }
     });
     
-    /*rtc.on('send offer', function(socketId) {
-        isCaller = 0;
-        console.log("     Callee");
-    });*/
+    rtc.on('receive offer', function(data) {
+        isCaller = false;
+    });
 
 }
