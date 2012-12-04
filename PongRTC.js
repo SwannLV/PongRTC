@@ -1,15 +1,14 @@
 // MAIN
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 // standard global variables
-var container, scene, camera, renderer, controls, stats;
+var container, scene, camera, renderer, stats;
 var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
 
-// Communication manager server
-var serverUrl = 'ws://swannlv.1.jit.su/';
-//var serverUrl = 'ws://localhost:3000/';
-var room = 'superRoom';
-// video Elements
+// Communication-manager server
+//var serverUrl = 'ws://swannlv.1.jit.su/';
+var serverUrl = 'ws://192.168.0.13:3000/';//localhost
+var isCaller = true;
 var localVideo, remoteVideo;
 var localVideoTexture, remoteVideoTexture;
 // Meshes
@@ -24,6 +23,35 @@ var ballVelZ = Math.sin(angle)*10;
 // constant for the head
 var headX = 0;
 var headXoffset = 0;
+
+// if there are no room, pick one at random
+if( window.location.hash === '' ){			
+	window.location.hash = 'room'+Math.floor(Math.random()*10000).toString(16);
+}
+// update footer
+var element	= document.querySelector('#footer .joinhere a');
+element.href = element.innerText	= window.location;
+var room = window.location.hash.slice(1);
+document.body.setAttribute("tabIndex", "0");    // make body focusable
+// handle newRoomForm
+var newRoomForm	= document.getElementById('newRoomForm')
+newRoomForm.addEventListener('keydown', function(event){ event.stopPropagation();	});
+newRoomForm.addEventListener('submit', function(){
+	// get room name
+	var roomName = newRoomForm[0].value;
+	// open a tab to this room
+	var url	= location.protocol+'//'+location.host+location.pathname+'#'+roomName
+	window.open(url, '_blank');
+	// put back the focus on body
+	document.body.focus();		
+});
+function toggleInfo() {
+    if (document.getElementById('info').style.display == "block") {
+    	document.getElementById('info').style.display = "none";
+	} else {
+		document.getElementById('info').style.display = "block";
+	}
+}
 
 init();
 animate();
@@ -49,8 +77,6 @@ function init()
 	// EVENTS
 	THREEx.WindowResize(renderer, camera);
 	THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
-	// CONTROLS
-	//controls = new THREE.TrackballControls( camera );
 	// STATS
 	stats = new Stats();
 	stats.domElement.style.position = 'absolute';
@@ -204,16 +230,12 @@ function update()
     { 
 		localRacket.position.x -= deltaMove;
 	}
-   // 
-   
-    //localRacket.position.x = headX - headXoffset;
 
     updateBallPosition(deltaClock);
     
     // Move the sky
     dome.rotation.y = (dome.rotation.y + deltaClock/100) % (2*Math.PI);
     
-	//controls.update();
 	stats.update();
 }
 
@@ -276,7 +298,7 @@ function updateBallPosition(deltaClock)
 
 function setTrackerStatus(state) {
     console.log(state);
-    $('#message').html(state);
+    //$('#message').html(state);
   }
   
 function connectRTC () {
@@ -300,7 +322,13 @@ function connectRTC () {
     
     rtc.on('receive_msg', function(data, socket){
          //localRacket.position.x = data.lcRtX;
+         //console.log('receive_msg / '+ data.rmRtX);
          remoteRacket.position.x = data.rmRtX;
     });
+    
+    /*rtc.on('send offer', function(socketId) {
+        isCaller = 0;
+        console.log("     Callee");
+    });*/
 
 }

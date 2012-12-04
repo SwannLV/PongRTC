@@ -33,3 +33,6 @@ fu.get("/images/sky/posy.jpg", fu.staticHandler("images/sky/posy.jpg"));
 fu.get("/images/sky/negy.jpg", fu.staticHandler("images/sky/negy.jpg"));
 fu.get("/images/sky/posx.jpg", fu.staticHandler("images/sky/posx.jpg"));
 fu.get("/images/sky/negx.jpg", fu.staticHandler("images/sky/negx.jpg"));
+
+// INFO BUTTON
+fu.get("/images/i.png", fu.staticHandler("images/i.png"));
