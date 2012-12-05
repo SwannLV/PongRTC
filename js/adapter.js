@@ -18,6 +18,7 @@ if (navigator.mozGetUserMedia) {
     element.mozSrcObject = stream;
     element.play();
   };
+  alert('Browser does not appear to be WebRTC-capable\nPlease use last version of Chrome');
 } else if (navigator.webkitGetUserMedia) {
   console.log("This appears to be Chrome");
 
@@ -34,4 +35,5 @@ if (navigator.mozGetUserMedia) {
   };
 } else {
   console.log("Browser does not appear to be WebRTC-capable");
+  alert('Browser does not appear to be WebRTC-capable\nPlease use last version of Chrome');
 }
