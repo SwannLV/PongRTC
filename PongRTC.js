@@ -78,7 +78,7 @@ function init()
 	container.appendChild( renderer.domElement );
 	// EVENTS
 	THREEx.WindowResize(renderer, camera);
-	THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
+	//THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
 	// STATS
 	stats = new Stats();
 	stats.domElement.style.position = 'absolute';
