@@ -212,10 +212,10 @@ function animate()
             }));
         }
     }
-    else {
+    if (!remoteVideo.readyState) {
         // IF NO PEER CONNECTION:
         //localRacket.position.x = headX - headXoffset;
-        remoteRacket.position.x = localRacket.position.x;
+        remoteRacket.position.x = ball.position.x;
     }
     if( remoteVideo && remoteVideo.readyState === remoteVideo.HAVE_ENOUGH_DATA ){
         remoteVideoTexture.needsUpdate = true;
