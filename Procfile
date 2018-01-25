@@ -1,1 +1,1 @@
-web: node ServerPongRTC.js
+web: node Server.js

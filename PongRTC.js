@@ -6,7 +6,7 @@ var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
 
 // Communication-manager server
-var serverUrl = 'ws://pongrtc2018-swannlv.c9users.io'//'ws://swannlv.1.jit.su/';
+var serverUrl = 'ws://pongrtcserver.herokuapp.com'//'ws://pongrtc2018-swannlv.c9users.io'//'ws://swannlv.1.jit.su/';
 //var serverUrl = 'ws://192.168.0.13:3000/';
 var isCaller = true;
 var localVideo, remoteVideo;
