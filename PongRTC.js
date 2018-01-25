@@ -6,7 +6,7 @@ var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
 
 // Communication-manager server
-var serverUrl = 'ws://swannlv.1.jit.su/';
+var serverUrl = 'ws://pongrtc2018-swannlv.c9users.io'//'ws://swannlv.1.jit.su/';
 //var serverUrl = 'ws://192.168.0.13:3000/';
 var isCaller = true;
 var localVideo, remoteVideo;
@@ -236,7 +236,7 @@ function init()
 	
 	iLastUpdate = Date.now();
     
-   // connectRTC();
+    connectRTC();
 }
   
 function animate() 
@@ -247,7 +247,7 @@ function animate()
     if( localVideo && localVideo.readyState === localVideo.HAVE_ENOUGH_DATA ){
         localVideoTexture.needsUpdate = true;
         
-        /*if(isCaller){
+        if(isCaller){
              rtc._socket.send(JSON.stringify({
                   "eventName": "msg",
                   "data": {
@@ -266,7 +266,7 @@ function animate()
                   "headX": headX - headXoffset
                   }
             }));
-        }*/
+        }
     }
     if (!remoteVideo.readyState) {
         // IF NO PEER CONNECTION:

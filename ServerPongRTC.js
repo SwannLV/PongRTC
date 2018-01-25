@@ -18,7 +18,7 @@ webRTC.rtc.on('connect', function(rtc) {
 });
 
 webRTC.rtc.on('send answer', function(rtc) {
-rtc.get
+//rtc.get
     console.log('client send answer');
  	//answer sent
 });
