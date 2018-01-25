@@ -10,11 +10,6 @@ fu.get("/js/Three.js", fu.staticHandler("js/Three.js"));
 fu.get("/js/jquery-1.8.3.min.js", fu.staticHandler("js/jquery-1.8.3.min.js"));
 fu.get("/js/adapter.js", fu.staticHandler("js/adapter.js"));
 fu.get("/js/Detector.js", fu.staticHandler("js/Detector.js"));
-fu.get("/js/Explode.js", fu.staticHandler("js/Explode.js"));
-fu.get("/js/Tools.js", fu.staticHandler("js/Tools.js"));
-fu.get("/js/Collision.js", fu.staticHandler("js/Collision.js"));
-fu.get("/js/Ball.js", fu.staticHandler("js/Ball.js"));
-fu.get("/js/BonusNet.js", fu.staticHandler("js/BonusNet.js"));
 fu.get("/js/Stats.js", fu.staticHandler("js/Stats.js"));
 fu.get("/js/THREEx.KeyboardState.js", fu.staticHandler("js/THREEx.KeyboardState.js"));
 fu.get("/js/THREEx.FullScreen.js", fu.staticHandler("js/THREEx.FullScreen.js"));
@@ -38,9 +33,6 @@ fu.get("/images/sky/posy.jpg", fu.staticHandler("images/sky/posy.jpg"));
 fu.get("/images/sky/negy.jpg", fu.staticHandler("images/sky/negy.jpg"));
 fu.get("/images/sky/posx.jpg", fu.staticHandler("images/sky/posx.jpg"));
 fu.get("/images/sky/negx.jpg", fu.staticHandler("images/sky/negx.jpg"));
-
-// IMAGES
-fu.get("/images/GlowSphere.png", fu.staticHandler("images/GlowSphere.png"));
 
 // INFO BUTTON
 fu.get("/images/i.png", fu.staticHandler("images/i.png"));

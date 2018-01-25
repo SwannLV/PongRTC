@@ -6,7 +6,7 @@ var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
 
 // Communication-manager server
-var serverUrl = 'wss://pongrtcserver.herokuapp.com'//'ws://pongrtc2018-swannlv.c9users.io'//'ws://swannlv.1.jit.su/';
+var serverUrl = 'wss://pongrtcserver.herokuapp.com'//'ws://swannlv.1.jit.su/';
 //var serverUrl = 'ws://192.168.0.13:3000/';
 var isCaller = true;
 var localVideo, remoteVideo;
@@ -16,27 +16,17 @@ var localRacket, remoteRacket, ball, dome;
 // constant for the field
 var fieldW   = 859;
 var fieldL   = 1059;
-// constant for the arena
-var arenaHalfWidth  = 500;
-var arenaHalfLength = 500;
-var arenaNetElementCount = 5;
+// constant for the ball
+var angle    = 10;//Math.random()*Math.PI*2; // TO DO
+var ballVelX = Math.cos(angle)*10;
+var ballVelZ = Math.sin(angle)*10;
+var sensibility = 1.0;
 // constant for the head
 var headX = 0;
 var headXoffset = 0;
-// constant for the racket
-var racketRadius = 80;
-var racketCorner = 10;
-// camera helpers
-var cameraDistance = 1;
-// collisions manager
-var collisions = new CCollision;
-// net placed on the middle of the arena
-var BonusNet;
-
-var iLastUpdate = Date.now();
 
 // if there are no room, pick one at random
-if( window.location.hash === '' ){    		
+if( window.location.hash === '' ){			
 	window.location.hash = 'room'+Math.floor(Math.random()*10000).toString(16);
 }
 // update footer
@@ -78,11 +68,8 @@ function init()
 	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 	scene.add(camera);
-	camera.position.set(0,600,-1200);
+	camera.position.set(0,400,-900);
 	camera.lookAt(scene.position);	
-	var vToCenter = new THREE.Vector3 (camera.position.x - scene.position.x, camera.position.y - scene.position.y, camera.position.z - scene.position.z);
-	cameraDistance = vToCenter.length ();
-	
 	// RENDERER
 	renderer = new THREE.WebGLRenderer( {antialias:true} );
 	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -105,7 +92,6 @@ function init()
     var light2 = new THREE.PointLight(0xffffff);
     light2.position.set(-500,250,-500);
 	scene.add(light2);
-	
     // SKY DOME
     var urls = [];
     var skyTextures = [];
@@ -130,31 +116,12 @@ function init()
     dome.position.y = -1200;
     scene.add(dome);
 	// FLOOR
-	var floorMaterial = new THREE.MeshPhongMaterial( { color: 0x555555, transparent: true, opacity: 0.4} );
-	var floorGeometry = new THREE.CubeGeometry (arenaHalfWidth*2, 20, arenaHalfLength*2);
+	var floorMaterial = new THREE.MeshBasicMaterial( { color: 0x555555, transparent: true, opacity: 1.0} );
+	var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
 	var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-	floor.position.y = -10.0;
-	//floor.doubleSided = true;
+	floor.position.y = -0.5;
+	floor.doubleSided = true;
 	scene.add(floor);
-	var WallGeometry = new THREE.CubeGeometry (20, 100, 1000);
-	var Wall1 = new THREE.Mesh(WallGeometry, floorMaterial);
-	var Wall2 = new THREE.Mesh(WallGeometry, floorMaterial);
-	Wall1.position.x = arenaHalfWidth + 10.0;
-	Wall2.position.x = -arenaHalfWidth - 10.0;
-	Wall1.position.y = 50;
-	Wall2.position.y = 50;
-	//Wall1.doubleSided = true;
-	//Wall2.doubleSided = true;
-	scene.add(Wall1);
-	scene.add(Wall2);
-	var WallObject1 = new CCollisionObject (Wall1, "Wall 1");
-	var WallObject2 = new CCollisionObject (Wall2, "Wall 2");
-	WallObject1.addColidableFaceFromNormal (new THREE.Vector3 (-1,0,0));
-	WallObject2.addColidableFaceFromNormal (new THREE.Vector3 (1,0,0))
-	WallObject1.applyTransformation ();
-	WallObject2.applyTransformation ();
-	collisions.add (WallObject1);
-	collisions.add (WallObject2);
 	
 	/////////////
 	// Rackets //
@@ -197,53 +164,30 @@ function init()
 	remoteVideoTexture.repeat.set(-1, 1);
 	remoteVideoTexture.offset.set( 1, 0);
         
-    
-	var racketGeometry = new THREE.CubeGeometry( racketRadius * 2, 120, racketCorner*2 );
+	var racketGeometry = new THREE.CubeGeometry( 160, 120, 0 );
 	var localCubeMaterial = new THREE.MeshBasicMaterial( { map: localVideoTexture, transparent: true, opacity: 0.7} );
-	var localRacketMesh = new THREE.Mesh( racketGeometry, localCubeMaterial );
-	localRacket = new CCollisionObject( localRacketMesh, "Local Racket" );
-	localRacket.move (0,60,-450);
-	localRacket.makeAllFacesColidable ();
-	localRacket.applyRotations ();
-	scene.add(localRacket.m_Mesh);
-	collisions.add(localRacket);
+	localRacket = new THREE.Mesh( racketGeometry, localCubeMaterial );
+	localRacket.position.set(0,60,-450);
+	scene.add(localRacket);
     
     var remoteCubeMaterial = new THREE.MeshBasicMaterial( { color: 0xFF4444, map: remoteVideoTexture } );
-    var remoteRacketMesh = new THREE.Mesh( racketGeometry, remoteCubeMaterial );
-	remoteRacket = new CCollisionObject( remoteRacketMesh, "Remote Racket" );
-	remoteRacket.move (0,60,450);
-	remoteRacket.makeAllFacesColidable ();
-	remoteRacket.applyRotations ();
-	scene.add(remoteRacket.m_Mesh);
-	collisions.add(remoteRacket);
+    remoteRacket = new THREE.Mesh( racketGeometry, remoteCubeMaterial );
+	remoteRacket.position.set(0,60,450);
+	scene.add(remoteRacket);
     
-	ball = new CBall (20);
-	ball.init ();
-    ball.m_Mesh.position.set (0, ball.m_fRadius, 0);
-	scene.add(ball.m_Mesh);
-	
-	BonusNet = new CBonusNet (scene, arenaNetElementCount, arenaHalfWidth);
-	
-	// Alphabet
-	/*
-	//var AlphaTexture = THREE.ImageUtils.loadTexture("images/alphabetWhite.png");
-	//var SpriteAlpha = new THREE.Sprite ({map: AlphaTexture, alignment: THREE.SpriteAlignment.topLeft, opacity: 0.25 });
-	var SpriteAlpha = new THREE.Sprite ({alignment: THREE.SpriteAlignment.topLeft, opacity: 1 });
-	SpriteAlpha.position.set( 0, 100, 0 );
-	//SpriteAlpha.scale.set( AlphaTexture.image.width, AlphaTexture.image.height, 1 );
-	scene.add(SpriteAlpha);
-	*/
-	
-	iLastUpdate = Date.now();
+    var ballGeometry = new THREE.CubeGeometry( 40, 40, 40 );
+    var ballMaterial = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
+	ball = new THREE.Mesh( ballGeometry, ballMaterial );
+    ball.position.set (0,20,0);
+	scene.add(ball);
     
     connectRTC();
 }
   
 function animate() 
 {
-    var deltaClock = clock.getDelta();
-    var deltaMove = deltaClock * 2000;
     requestAnimationFrame( animate );
+    localRacket.position.x = sensibility * (headX - headXoffset);
     if( localVideo && localVideo.readyState === localVideo.HAVE_ENOUGH_DATA ){
         localVideoTexture.needsUpdate = true;
         
@@ -252,8 +196,8 @@ function animate()
                   "eventName": "msg",
                   "data": {
                   "room": room,
-                  "ballX" : ball.m_Mesh.position.x,
-                  "ballZ" : ball.m_Mesh.position.z,
+                  "ballX" : ball.position.x,
+                  "ballZ" : ball.position.z,
                   "headX": headX - headXoffset
                   }
             }));
@@ -271,143 +215,44 @@ function animate()
     if (!remoteVideo.readyState) {
         // IF NO PEER CONNECTION:
         //localRacket.position.x = headX - headXoffset;
-        if (ball.m_Mesh.position.x > remoteRacket.m_Mesh.position.x) {
-        	remoteRacket.addVelocity (50, 0, 0);
-        } else if (ball.m_Mesh.position.x < remoteRacket.m_Mesh.position.x) {
-        	remoteRacket.addVelocity (-50, 0, 0);
-        }
+        remoteRacket.position.x = ball.position.x;
     }
     if( remoteVideo && remoteVideo.readyState === remoteVideo.HAVE_ENOUGH_DATA ){
         remoteVideoTexture.needsUpdate = true;
     }
-
-	remoteRacket.update (deltaClock);
-	if (remoteRacket.m_Mesh.position.x - racketRadius < -arenaHalfWidth) {
-		remoteRacket.move (racketRadius - arenaHalfWidth, remoteRacket.m_Mesh.position.y, remoteRacket.m_Mesh.position.z);
-	}
-	if (remoteRacket.m_Mesh.position.x + racketRadius > arenaHalfWidth) {
-		remoteRacket.move (arenaHalfWidth - racketRadius, remoteRacket.m_Mesh.position.y, remoteRacket.m_Mesh.position.z);
-	}
-
 	render();		
-	update(deltaClock, deltaMove);
-	
-	if (localRacket.m_Mesh.position.x - racketRadius < -arenaHalfWidth) {
-		localRacket.move (racketRadius - arenaHalfWidth, localRacket.m_Mesh.position.y, localRacket.m_Mesh.position.z);
-	}
-	if (localRacket.m_Mesh.position.x + racketRadius > arenaHalfWidth) {
-		localRacket.move (arenaHalfWidth - racketRadius, localRacket.m_Mesh.position.y, localRacket.m_Mesh.position.z);
-	}
-	
+	update();
 }
 
-function update(deltaClock, deltaMove)
+function update()
 {
-    var bApplyLocal = false;
+    var deltaClock = clock.getDelta();
+    var deltaMove = deltaClock * 500;
     
-    if(keyboard.pressed("c")) {
-		camera.position.set(0,600,-1200);
-		camera.lookAt(scene.position);	
-	    headXoffset = headX;
-    }
-     
-	//if ( keyboard.pressed("left") ) {
-	if ( keyboard.pressed("left") || keyboard.pressed("k") ) { 
-		localRacket.addVelocity (500, 0, 0);
+    if(keyboard.pressed("c")) headXoffset = headX;
+	if ( keyboard.pressed("left") ) 
+	{ 
+		localRacket.position.x += deltaMove;
 	}
-    //if ( keyboard.pressed("right") ) {
-    if ( keyboard.pressed("right") || keyboard.pressed("m") ) { 
-		localRacket.addVelocity (-500, 0, 0);
+    if ( keyboard.pressed("right") ) 
+    { 
+		localRacket.position.x -= deltaMove;
 	}
-	//if ( keyboard.pressed("up") ) {
-	if ( keyboard.pressed("o") ) {
-		localRacket.addRotation (0, 0.05, 0);
-		bApplyLocal = true
+    if ( keyboard.pressed("up") ) 
+    { 
+    	sensibility = 1.05 * sensibility;
 	}
-	//if ( keyboard.pressed("down") ) {
-	if ( keyboard.pressed("l") ) {
-		localRacket.addRotation (0, -0.05, 0);
-		bApplyLocal = true
+    if ( keyboard.pressed("down") && sensibility > 0.2) 
+    { 
+        sensibility = sensibility / 1.05;
 	}
 
-    // Head movements
-    if (headX != 0) {
-        localRacket.move (headX - headXoffset, localRacket.m_Mesh.position.y, localRacket.m_Mesh.position.z);
-    }
-    
-	if ( keyboard.pressed("z") ) {
-		var vCamLook  = new THREE.Vector3 (camera.position.x, camera.position.y, camera.position.z);
-		var vCamUp    = new THREE.Vector3 (camera.up.x, camera.up.y, camera.up.z);
-		var vCamLeft  = new THREE.Vector3 (camera.position.x, camera.position.y, camera.position.z);
-		var fRotAngle = 0.01;
-		vCamLook.subSelf (scene.position);
-		vCamLeft.cross (vCamLook, vCamUp);
-		vCamUp.cross (vCamLeft, vCamLook);
-		vCamUp.normalize ();
-		vCamUp.multiplyScalar (cameraDistance);
-		camera.position.add (vCamLook.multiplyScalar (Math.cos (fRotAngle)), vCamUp.multiplyScalar (Math.sin (fRotAngle)));
-		camera.position.addSelf (scene.position);
-		camera.lookAt(scene.position);	
-	}
-	if ( keyboard.pressed("s") ) {
-		var vCamLook  = new THREE.Vector3 (camera.position.x, camera.position.y, camera.position.z);
-		var vCamUp    = new THREE.Vector3 (camera.up.x, camera.up.y, camera.up.z);
-		var vCamLeft  = new THREE.Vector3 (camera.position.x, camera.position.y, camera.position.z);
-		var fRotAngle = -0.01;
-		vCamLook.subSelf (scene.position);
-		vCamLeft.cross (vCamLook, vCamUp);
-		vCamUp.cross (vCamLeft, vCamLook);
-		vCamUp.normalize ();
-		vCamUp.multiplyScalar (cameraDistance);
-		camera.position.add (vCamLook.multiplyScalar (Math.cos (fRotAngle)), vCamUp.multiplyScalar (Math.sin (fRotAngle)));
-		camera.position.addSelf (scene.position);
-		camera.lookAt(scene.position);	
-	}
-	if ( keyboard.pressed("q") ) {
-		var vCamLook  = new THREE.Vector3 (camera.position.x, camera.position.y, camera.position.z);
-		var vCamLeft  = new THREE.Vector3 (camera.position.x, camera.position.y, camera.position.z);
-		var fRotAngle = 0.01;
-		var camY;
-		vCamLook.subSelf (scene.position);
-		camY = vCamLook.y;
-		vCamLook.y = 0;
-		vCamLeft.cross (vCamLook, camera.up);
-		camera.position.add (vCamLook.multiplyScalar (Math.cos (fRotAngle)), vCamLeft.multiplyScalar (Math.sin (fRotAngle)));
-		camera.position.addSelf (scene.position);
-		camera.position.y = camY;
-		camera.lookAt(scene.position);	
-	}
-	if ( keyboard.pressed("d") ) {
-		var vCamLook  = new THREE.Vector3 (camera.position.x, camera.position.y, camera.position.z);
-		var vCamLeft  = new THREE.Vector3 (camera.position.x, camera.position.y, camera.position.z);
-		var fRotAngle = -0.01;
-		var camY;
-		vCamLook.subSelf (scene.position);
-		camY = vCamLook.y;
-		vCamLook.y = 0;
-		vCamLeft.cross (vCamLook, camera.up);
-		camera.position.add (vCamLook.multiplyScalar (Math.cos (fRotAngle)), vCamLeft.multiplyScalar (Math.sin (fRotAngle)));
-		camera.position.addSelf (scene.position);
-		camera.position.y = camY;
-		camera.lookAt(scene.position);	
-	}
-
-	var iNow = Date.now();
-	var iDeltaTime = iNow - iLastUpdate;
-	iLastUpdate = iNow;
-	
     if (isCaller) {
-        updateBallPosition(iDeltaTime);
-        //updateBallPosition(5);
+        updateBallPosition(deltaClock);
     }
     
     // Move the sky
     dome.rotation.y = (dome.rotation.y + deltaClock/100) % (2*Math.PI);
-    
-    if (bApplyLocal) localRacket.applyRotations ();
-    localRacket.update (deltaClock);
-    
-    BonusNet.update (ball, iDeltaTime);
     
 	stats.update();
 }
@@ -435,16 +280,38 @@ function render()
 
 function updateBallPosition(deltaClock)
 {
-	ball.move (deltaClock, collisions);
-	var pos	= ball.m_Mesh.position;
-	if (pos.z < -arenaHalfLength || (pos.z < 0 && Math.abs (pos.x) > arenaHalfWidth)) {
-		ball.init ();
-		pos.set(remoteRacket.m_Mesh.position.x, pos.y, remoteRacket.m_Mesh.position.z - ball.m_fRadius);
+    // get ball position
+	var pos	= ball.position;
+    
+    // update position
+    pos.x += ballVelX;	
+	pos.z += ballVelZ;
+	
+    // check collision with each player racket
+    var localDist = ball.position.distanceToSquared(localRacket.position)/1000;
+    var remoteDist = ball.position.distanceToSquared(remoteRacket.position)/1000;
+    if ((localDist < 10 && ballVelZ < 0) || (remoteDist < 10 && ballVelZ > 0)){
+        //if ((ball.position.z > localRacket.position.z) || (ball.position.z < remoteRacket.position.z)){
+		    ballVelZ	*= -1;
+        //}
+        // TO DO: adjust angle with the exact impact position
+        /*angle       = Math.random()*Math.PI*2;
+        ballVelX    = Math.cos(angle)*10;
+        ballVelZ    = Math.sin(angle)*10;*/
 	}
-	if (pos.z > arenaHalfLength || (pos.z > 0 && Math.abs (pos.x) > arenaHalfWidth)) {
-		ball.init ();
-		pos.set(localRacket.m_Mesh.position.x, pos.y, localRacket.m_Mesh.position.z + ball.m_fRadius);
-	}
+    else
+    {
+    	// bounce the ball if it reach the border
+    	if( pos.x < -fieldW/2 )	ballVelX	*= -1;
+    	if( pos.x > +fieldW/2 )	ballVelX	*= -1;
+    	if( pos.z < -fieldL/2 )	{ pos.set(0, pos.y, 0); ballVelX *= -1; }
+    	if( pos.z > +fieldL/2 )	{ pos.set(0, pos.y, 0); ballVelX *= -1; }
+    	// get the boundaries
+    	pos.x	= Math.max(pos.x, -fieldW/2);
+    	pos.x	= Math.min(pos.x, +fieldW/2);
+    	pos.z	= Math.max(pos.z, -fieldL/2);
+    	pos.z	= Math.min(pos.z, +fieldL/2);
+    }
 }
 
 function setTrackerStatus(state) {
@@ -473,11 +340,10 @@ function connectRTC () {
     
     rtc.on('receive_msg', function(data, socket){
          //localRacket.position.x = data.lcRtX;
-         //remoteRacket.position.x = data.rmRtX;
-         remoteRacket.move (data.rmRtX, remoteRacket.m_Mesh.position.y, remoteRacket.m_Mesh.position.z);
+         remoteRacket.position.x = data.rmRtX;
          if (isCaller === false){
-             ball.m_Mesh.position.x = data.ballX;
-             ball.m_Mesh.position.z = -data.ballZ;
+             ball.position.x = data.ballX;
+             ball.position.z = -data.ballZ;
          }
     });
     
