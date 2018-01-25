@@ -236,7 +236,7 @@ function init()
 	
 	iLastUpdate = Date.now();
     
-    connectRTC();
+   // connectRTC();
 }
   
 function animate() 
@@ -247,7 +247,7 @@ function animate()
     if( localVideo && localVideo.readyState === localVideo.HAVE_ENOUGH_DATA ){
         localVideoTexture.needsUpdate = true;
         
-        if(isCaller){
+        /*if(isCaller){
              rtc._socket.send(JSON.stringify({
                   "eventName": "msg",
                   "data": {
@@ -266,7 +266,7 @@ function animate()
                   "headX": headX - headXoffset
                   }
             }));
-        }
+        }*/
     }
     if (!remoteVideo.readyState) {
         // IF NO PEER CONNECTION:
