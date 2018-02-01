@@ -144,10 +144,13 @@ function init()
     remoteVideo.autoplay  = true;
     document.body.appendChild(remoteVideo);
     
+    
     // Start RTC
-	rtc.createStream({"video": true, "audio": true}, function(stream){
+    rtc.createStream({"video": true, "audio": true}, function(stream){
+        alert('\n\n     2 players mode does not work anymore.\n     Fixing in progress, sorry   =)\n\n\n\n')
 		localVideo.src	= URL.createObjectURL(stream);
 	}, function(){
+	    alert('\n\n     PLEASE USE A CAMERA   =)\n\n\n\n')
 		console.log('createStream failed', arguments);
 	});
     
